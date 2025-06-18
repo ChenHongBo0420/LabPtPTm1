@@ -7,7 +7,7 @@ import zarr
 import s3fs
 
 
-tempdir = os.path.join(tempfile.gettempdir(),'labptptm2')
+tempdir = os.path.join(tempfile.gettempdir(),'labptptm1')
 
 
 class Config:
@@ -30,7 +30,7 @@ class Config:
     def load(self):
         for f in self.config_file_search_paths():
             # Read YAML file
-            filename = os.path.join(f, "labptptm2.yaml")
+            filename = os.path.join(f, "labptptm1.yaml")
             if os.path.exists(filename):
                 with open(filename, 'r') as stream:
                     conf = yaml.safe_load(stream)
@@ -38,7 +38,7 @@ class Config:
                 break
 
     def dump(self, tardir=os.getcwd()):
-        dump_path = os.path.join(tardir, 'labptptm2.yaml')
+        dump_path = os.path.join(tardir, 'labptptm1.yaml')
         d = {}
         for k in self.__slots__:
             d[k] = getattr(self, k)
