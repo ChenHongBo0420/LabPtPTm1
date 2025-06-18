@@ -15,7 +15,7 @@ class Config:
     
     def __init__(self):
         self.store = None 
-        self.remote = "s3://optcommpubdataqrfan/labptptm2_zarr" 
+        self.remote = "s3://optcommpubdataqrfan/labptptm1_zarr"
         self.cache_storage = tempdir
         self.load()
         if self.store is None or os.path.normpath(self.store) == os.path.normpath(tempdir):
