@@ -20,7 +20,7 @@ class Config:
         self.load()
         if self.store is None or os.path.normpath(self.store) == os.path.normpath(tempdir):
             logging.warning((f'Data would be auto-cached in default temporary location: {self.cache_storage}, '
-                             f'set labptptm2.config.cache_storage to other locations to suppress this warning'))
+                             f'set labptptm1.config.cache_storage to other locations to suppress this warning'))
 
     def _update(self, d):
         for k in self.__slots__:
