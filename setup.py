@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Install LabPtPtm2."""
+"""Install LabPtPtm1."""
 
 from setuptools import setup, find_packages
 
