@@ -4,64 +4,53 @@ from . import store
 from typing import Tuple, List
 
 
-def select(SRC, LP, CH, REP) -> Tuple[List[zarr.Group], List[zarr.Group]]:
-    ''' simple data selection '''
+def select(SRC, LP, REP) -> Tuple[List[zarr.Group], List[None]]:
+    """Data selection for single-channel LabPtPtm1 dataset.
+
+    Returns two lists:
+      - List of data groups (each has 'recv' and 'sent')
+      - List of supplementary groups (always None for this dataset)
+    """
     droot = store.open_group()
 
-    if np.isscalar(SRC):
-        SRC = [SRC]
-    if np.isscalar(LP):
-        LP = [LP]
-    if np.isscalar(CH):
-        CH = [CH]
-    if np.isscalar(REP):
-        REP = [REP]
+    # Ensure inputs are lists
+    SRC = [SRC] if np.isscalar(SRC) else list(SRC)
+    LP  = [LP]  if np.isscalar(LP)  else list(LP)
+    REP = [REP] if np.isscalar(REP) else list(REP)
 
+    # Validate and collect targets
     targets = []
     for src in SRC:
         for lp in LP:
-            for ch in CH:
-                for rep in REP:
-                    _validate_args(src, lp, ch, rep)
-                    targets.append((src, lp, ch, rep))
+            for rep in REP:
+                _validate_args(src, lp, rep)
+                targets.append((src, lp, rep))
 
     dat_grps = []
-    sup_grps = []
+    for src, lp, rep in targets:
+        # single-channel path under 815 km SSMF
+        grp = droot[f"815km_SSMF/src{src}"][f"{lp}dBm_{rep}"]
+        dat_grps.append(grp)
 
-    for t in targets:
-        dat_grps.append(droot[_datapath(*t)])
-        try:
-            sup_grps.append(droot[_supdatapath(*t)])
-        except KeyError:  # supdata is not available
-            sup_grps.append(None)
-
+    # no supplementary data available in LabPtPtm1
+    sup_grps = [None] * len(dat_grps)
     return dat_grps, sup_grps
 
 
-def _validate_args(src, lp, ch, rep):
-    assert src in [1, 2], f'message source index is either 1 or 2, get {src}'
-    assert lp in range(-5, 4), f'launched power is from -5 to 3 (dBm), get {lp}'
-    assert ch in range(1, 8), f'channel index is from 1 to 7, get {ch}'
-    assert rep in [1, 2, 3], f'repeats index is from 1 to 3, get {rep}'
-
-
-def _datapath(src, lp, ch, rep):
-    return '1125km_SSMF/src%d/%ddBm_ch%d_%d' % (src, lp, ch, rep)
-
-
-def _supdatapath(src, lp, ch, rep):
-    return 'supdata/src%d/%ddBm_ch%d_%d' % (src, lp, ch, rep)
+def _validate_args(src: int, lp: int, rep: int):
+    assert src in [1, 2],     f"source index must be 1 or 2, got {src}"
+    assert lp in range(-5, 4), f"launched power must be between -5 and 3 dBm, got {lp}"
+    assert rep in [1, 2, 3],   f"repeat index must be 1, 2, or 3, got {rep}"
 
 
 def help():
     print(
-        'arguments:\n',
-        '  the 4 input arguments of select identify each collected data file: \n',
-        '  arg#1: int, random source sequence identifier, which can be either 1 or 2 \n',
-        '  arg#2: int, launched power in dBm unit, which must be a member of [-5, -4, -3, -2, -1, 0, 1, 2, 3] \n',
-        '  arg#3: int, channel index, which is member of [1, 2, 3, 4, 5, 6, 7] \n',
-        '  arg#4: int, index of scope captures under the same link configuration, a member of [1, 2, 3] \n',
-        'returns:\n',
-        '  a tuple of data gorup and supplementary data group (None if not available)\n',
-        'see more on: https://github.com/remifan/LabPtPTm2/blob/master/examples/basics.ipynb'
+        'arguments:\n'
+        '  arg#1: int, source index (1 or 2)\n'
+        '  arg#2: int, launched power in dBm (from -5 to 3)\n'
+        '  arg#3: int, repetition index (1, 2, or 3)\n'
+        'returns:\n'
+        '  tuple of (data_groups, supplementary_groups)\n'
+        '    data_groups: list of Zarr Groups each containing "recv" and "sent"\n'
+        '    supplementary_groups: always None for this dataset'
     )
