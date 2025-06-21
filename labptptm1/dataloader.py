@@ -33,7 +33,7 @@ def select(
 
     # 2) 列出并过滤 LP… 键
     all_lp_keys = list(band[mod_key].keys())
-    prefix = f"LP{lp_dbm:+d}_"
+    prefix = f"LP{lp_dbm:d}_"
     matching = [k for k in all_lp_keys if k.startswith(prefix)]
     if not matching:
         raise AssertionError(
